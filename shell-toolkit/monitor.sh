@@ -1,16 +1,32 @@
 #!/bin/bash
-# monitor.sh - Stage 2: add conditionals
+# monitor.sh - Stage 3: functions and loops
 
-name="Shreyasi"
-echo "Hello, $name. Running system check..."
-echo "Current date: $(date)"
+check_disk() {
+  disk_usage=$(df / | tail -1 | awk '{print $5}' | sed 's/%//')
+  if [ "$disk_usage" -gt 80 ]; then
+    echo "WARNING: Disk usage high at ${disk_usage}%"
+  else
+    echo "OK: Disk usage at ${disk_usage}%"
+  fi
+}
 
-disk_usage=$(df / | tail -1 | awk '{print $6}' | sed 's/%//')
+check_memory() {
+  mem_usage=$(free | grep Mem | awk '{print ($3/$2) * 100.0}')
+  echo "Memory usage: ${mem_usage}%"
+}
 
-if [ "$disk_usage" -gt 80 ]; then
-  echo "WARNING: Disk usage is high at ${disk_usage}%"
-elif [ "$disk_usage" -gt 50 ]; then
-  echo "NOTICE: Disk usage is moderate at ${disk_usage}%"
-else
-  echo "OK: Disk usage is healthy at ${disk_usage}%"
-fi
+check_services() {
+  services=("ssh" "cron" "docker")
+  for service in "${services[@]}"; do
+    if systemctl is-active --quiet "$service"; then
+      echo "$service: running"
+    else
+      echo "$service: NOT running"
+    fi
+  done
+}
+
+echo "=== System Report: $(date) ==="
+check_disk
+check_memory
+check_services
