@@ -1,6 +1,6 @@
 #!/bin/bash
-# monitor.sh - Updated by fix-a branch
 
+# monitor.sh - Updated by fix-a  and fix-b branches manually
 
 set -e
 
