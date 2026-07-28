@@ -5,7 +5,7 @@ name="Shreyasi"
 echo "Hello, $name. Running system check..."
 echo "Current date: $(date)"
 
-disk_usage=$(df / | tail -1 | awk '{print $6}' | sed 's/%//')
+disk_usage=$(df / | tail -1 | awk '{print $5}' | sed 's/%//')
 
 if [ "$disk_usage" -gt 80 ]; then
   echo "WARNING: Disk usage is high at ${disk_usage}%"
