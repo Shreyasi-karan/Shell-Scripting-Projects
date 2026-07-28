@@ -1,5 +1,5 @@
 #!/bin/bash
-# monitor.sh - Stage 5: external config
+# monitor.sh - updated by fix-b branch
 
 set -e
 source ./config.env
