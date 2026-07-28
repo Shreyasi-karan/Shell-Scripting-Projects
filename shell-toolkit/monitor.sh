@@ -1,8 +1,13 @@
 #!/bin/bash
-# monitor.sh - Stage 5: external config
+# monitor.sh - Updated by fix-a branch
+
 
 set -e
-source ./config.env
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/config.env"
+
+#source ./config.env
 
 log() {
   echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1" | tee -a "$LOGFILE"
