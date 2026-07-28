@@ -1,33 +1,24 @@
 #!/bin/bash
-# monitor.sh - Stage 4: arguments, logging, error handling
+# monitor.sh - Stage 5: external config
 
-set -e   # exit immediately if any command fails
-LOGFILE="monitor.log"
+set -e
+source ./config.env
 
 log() {
   echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1" | tee -a "$LOGFILE"
 }
 
-usage() {
-  echo "Usage: $0 [-d] [-m] [-s]"
-  echo "  -d  check disk only"
-  echo "  -m  check memory only"
-  echo "  -s  check services only"
-  exit 1
-}
-
 check_disk() {
   disk_usage=$(df / | tail -1 | awk '{print $5}' | sed 's/%//')
-  log "Disk usage: ${disk_usage}%"
-}
-
-check_memory() {
-  mem_usage=$(free | grep Mem | awk '{printf "%.1f", ($3/$2) * 100.0}')
-  log "Memory usage: ${mem_usage}%"
+  if [ "$disk_usage" -gt "$DISK_THRESHOLD" ]; then
+    log "WARNING: Disk usage ${disk_usage}% exceeds threshold ${DISK_THRESHOLD}%"
+  else
+    log "OK: Disk usage ${disk_usage}%"
+  fi
 }
 
 check_services() {
-  for service in ssh cron docker; do
+  for service in $SERVICES; do
     if systemctl is-active --quiet "$service" 2>/dev/null; then
       log "$service: running"
     else
@@ -36,17 +27,5 @@ check_services() {
   done
 }
 
-if [ $# -eq 0 ]; then
-  check_disk
-  check_memory
-  check_services
-else
-  while getopts "dms" opt; do
-    case $opt in
-      d) check_disk ;;
-      m) check_memory ;;
-      s) check_services ;;
-      *) usage ;;
-    esac
-  done
-fi
+check_disk
+check_services
