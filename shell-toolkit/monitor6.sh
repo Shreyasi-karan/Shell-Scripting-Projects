@@ -7,28 +7,16 @@ set -e
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/config.env"
 
-source ./utils.sh
-
 #source ./config.env
 
 log() {
   echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1" | tee -a "$LOGFILE"
 }
 
-send_alert() {
-  local message="$1"
-  if [ -n "$SLACK_WEBHOOK_URL" ]; then
-    curl -s -X POST -H 'Content-type: application/json' \
-      --data "{\"text\":\"$message\"}" "$SLACK_WEBHOOK_URL" > /dev/null
-  fi
-  log "ALERT SENT: $message"
-}
-
 check_disk() {
   disk_usage=$(df / | tail -1 | awk '{print $5}' | sed 's/%//')
   if [ "$disk_usage" -gt "$DISK_THRESHOLD" ]; then
     log "WARNING: Disk usage ${disk_usage}% exceeds threshold ${DISK_THRESHOLD}%"
-    send_alert "Disk usage on $(hostname) is at ${disk_usage}%"
   else
     log "OK: Disk usage ${disk_usage}%"
   fi
